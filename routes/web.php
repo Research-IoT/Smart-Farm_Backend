@@ -1,5 +1,6 @@
 <?php
 
+use App\Helpers\ApiHelpers;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,6 +14,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+//Route::get('/', function () {
+//    return view('welcome');
+//});
+
+Route::get('/login', function () {
+    return ApiHelpers::error([], 'Belum Login', 401);
+})->name('login');
