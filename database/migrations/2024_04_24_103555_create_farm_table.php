@@ -3,7 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use App\Models\User;
+use App\Models\Farm;
 
 return new class extends Migration
 {
@@ -12,14 +12,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('devices', function (Blueprint $table) {
+        Schema::create('farm', function (Blueprint $table) {
             $table->id();
-            $table->string('id_farm')->unique();
-            $table->foreignIdFor(User::class)->constrained();
-            $table->string('name')->unique();
-            $table->boolean('automatic');
-            $table->boolean('relay_blower');
-            $table->boolean('relay_heater');
+            $table->string('name_farm');
+            $table->string('id_pemilik');
             $table->timestamps();
         });
     }
@@ -29,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('devices');
+        Schema::dropIfExists('farm');
     }
 };
