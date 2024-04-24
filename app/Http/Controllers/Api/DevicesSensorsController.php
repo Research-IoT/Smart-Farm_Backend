@@ -49,7 +49,7 @@ class DevicesSensorsController extends Controller
         }
     }
 
-    public function all(Request $request)
+    public function summary(Request $request)
     {
         try{
             $devices = Devices::find($request->header('device_id'));

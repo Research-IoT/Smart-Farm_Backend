@@ -52,7 +52,7 @@ Route::prefix('/v1')->group(function () {
 
     Route::prefix('/data')->controller(DevicesSensorsController::class)->group(function(){
         Route::post('/add', 'add')->middleware('auth:sanctum');
-        Route::get('/all', 'all');
+        Route::get('/summary', 'summary');
         Route::get('/current', 'current');
     });
 });

@@ -16,12 +16,9 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(User::class)->constrained();
             $table->string('name')->unique();
-            $table->string('category');
-            $table->string('population');
-            $table->string('status');
             $table->boolean('automatic');
-            $table->boolean('relay_a');
-            $table->boolean('relay_b');
+            $table->boolean('relay_blower');
+            $table->boolean('relay_heater');
             $table->timestamps();
         });
     }
