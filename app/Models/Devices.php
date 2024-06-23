@@ -13,9 +13,6 @@ class Devices extends Model
     protected $table = 'devices';
     protected $fillable = [
         'name',
-        'category',
-        'population',
-        'status',
         'automatic',
         'relay_a',
         'relay_b'
