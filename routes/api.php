@@ -27,6 +27,8 @@ Route::prefix('/v1')->group(function () {
         ]);
     })->name('v1.home');
 
+    Route::get('/fcm', [UsersController::class, 'toFcm']);
+
     Route::prefix('users')->controller(UsersController::class)->group(function(){
         Route::post('/register', 'register');
         Route::post('/login', 'login');

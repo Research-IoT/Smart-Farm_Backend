@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use Exception;
-use Ramsey\Uuid\Uuid;
 
 use App\Models\User;
 use App\Helpers\ApiHelpers;
@@ -15,6 +14,11 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
+
+use Illuminate\Notifications\Notification;
+use NotificationChannels\Fcm\FcmChannel;
+use NotificationChannels\Fcm\FcmMessage;
+use NotificationChannels\Fcm\Resources\Notification as FcmNotification;
 
 class UsersController extends Controller
 {
@@ -122,5 +126,30 @@ class UsersController extends Controller
         } catch (Exception $error) {
             return ApiHelpers::badRequest($error, 'Terjadi Kesalahan');
         }
+    }
+
+    public function via($notifiable)
+    {
+        return [FcmChannel::class];
+    }
+
+    public function toFcm(): FcmMessage
+    {
+        return (new FcmMessage(notification: new FcmNotification(
+            title: 'Account Activated',
+            body: 'Your account has been activated.'
+        )))
+//            ->data(['data1' => 'value', 'data2' => 'value2'])
+//            ->custom([
+//                'android' => [
+//                    'notification' => [
+//                        'color' => '#0A0A0A',
+//                    ],
+//                    'fcm_options' => [
+//                        'analytics_label' => 'analytics',
+//                    ],
+//                ],
+//        ])
+            ;
     }
 }
