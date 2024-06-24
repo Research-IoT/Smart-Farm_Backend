@@ -3,7 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Str;
+use App\Models\User;
 
 return new class extends Migration
 {
@@ -12,13 +12,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('devices', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->enum('role', array('Pemilik','Penjaga'))->nullable();
-            $table->string('no_hp')->unique();
-            $table->string('alamat');
-            $table->string('password');
+            $table->string('name')->unique();
+            $table->string('status');
+            $table->boolean('automatic');
+            $table->boolean('heater');
+            $table->boolean('blower');
             $table->timestamps();
         });
     }
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('devices');
     }
 };
