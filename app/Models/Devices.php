@@ -13,7 +13,6 @@ class Devices extends Model
     protected $table = 'devices';
     protected $fillable = [
         'name',
-        'status',
         'automatic',
         'heater',
         'blower'
