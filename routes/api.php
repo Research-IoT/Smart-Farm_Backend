@@ -4,8 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\UsersController;
 use App\Http\Controllers\Api\DevicesController;
+use App\Http\Controllers\Api\PersonalAccessTokensController;
 use App\Http\Controllers\Api\DevicesSensorsController;
-use App\Http\Controllers\Api\DevicesBackupController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,7 +27,7 @@ Route::prefix('/v1')->group(function () {
         ]);
     })->name('v1.home');
 
-    Route::controller(UsersController::class)->group(function(){
+    Route::prefix('users')->controller(UsersController::class)->group(function(){
         Route::post('/register', 'register');
         Route::post('/login', 'login');
         Route::get('/profile', 'profile')->middleware('auth:sanctum');
@@ -35,24 +35,22 @@ Route::prefix('/v1')->group(function () {
     });
 
     Route::prefix('/devices')->controller(DevicesController::class)->group(function() {
-
-        Route::prefix('/auth')->group(function () {
-            Route::post('/register', 'register');
-            Route::post('/renew', 'renew');
-
-            Route::get('/all', 'all');
-            Route::get('/details', 'details');
+        Route::middleware(['auth:sanctum', 'abilities:users'])->group(function () {
+            Route::get('/', [DevicesController::class, 'all']);
+            Route::post('/register', [DevicesController::class, 'register']);
+            Route::post('/renew', [DevicesController::class, 'renew']);
+            Route::get('/details', [DevicesController::class, 'details']);
         });
 
         Route::prefix('/status')->group(function () {
             Route::post('/update', 'update')->middleware('auth:sanctum');
             Route::get('/sensor', 'sensor')->middleware('auth:sanctum');
         });
-    });
 
-    Route::prefix('/data')->controller(DevicesSensorsController::class)->group(function(){
+        Route::prefix('/sensor')->controller(DevicesSensorsController::class)->group(function(){
         Route::post('/add', 'add')->middleware('auth:sanctum');
-        Route::get('/summary', 'summary');
-        Route::get('/current', 'current');
+        Route::get('/summary', 'summary')->middleware('auth:sanctum');
+        Route::get('/current', 'current')->middleware('auth:sanctum');
+    });
     });
 });
