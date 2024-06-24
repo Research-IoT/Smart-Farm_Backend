@@ -17,13 +17,6 @@ class DevicesSensorsController extends Controller
     public function add(Request $request)
     {
         try {
-            $auth = Auth::user();
-
-            if (!$auth)
-            {
-                return ApiHelpers::badRequest([], 'Unauthorized', 401);
-            }
-
             $devices = Devices::find($request->input('device_id'));
 
             $dateTime = now();

@@ -45,7 +45,7 @@ class UsersController extends Controller
             $token = $user->createToken($request->name, ['users'])->plainTextToken;
 
             $response = [
-                'access_token' => "Bearer $token",
+                'token' => "Bearer $token",
                 'user' => $user
             ];
 
@@ -77,10 +77,10 @@ class UsersController extends Controller
             }
 
             $user->tokens()->delete();
-            $token = $user->createToken('users')->plainTextToken;
+            $token = $user->createToken($user->name, ['users'])->plainTextToken;
 
             $data = [
-                'access_token' => "Bearer $token",
+                'token' => "Bearer $token",
                 'user' => $user
             ];
 
