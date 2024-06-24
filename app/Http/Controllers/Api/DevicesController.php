@@ -21,7 +21,6 @@ public function register(Request $request)
     try {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:125',
-            'status' => 'required|string|max:125',
             'automatic' => 'required|boolean',
             'heater' => 'required|boolean',
             'blower' => 'required|boolean'
