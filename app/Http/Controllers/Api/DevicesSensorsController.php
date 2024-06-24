@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use Exception;
+
 use App\Models\Devices;
-use App\Models\DevicesSensors;
-use Illuminate\Http\Request;
 use App\Helpers\ApiHelpers;
+use App\Models\DevicesSensors;
 use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class DevicesSensorsController extends Controller
@@ -19,7 +21,7 @@ class DevicesSensorsController extends Controller
 
             if (!$auth)
             {
-                return ApiHelpers::error([], 'Unauthorized', 401);
+                return ApiHelpers::badRequest([], 'Unauthorized', 401);
             }
 
             $devices = Devices::find($request->input('device_id'));
@@ -45,7 +47,7 @@ class DevicesSensorsController extends Controller
 
             return ApiHelpers::success($data, 'Berhasil mengirim data!');
         } catch (Exception $e) {
-            return ApiHelpers::error($e, 'Terjadi Kesalahan');
+            return ApiHelpers::badRequest($e, 'Terjadi Kesalahan');
         }
     }
 
@@ -56,9 +58,9 @@ class DevicesSensorsController extends Controller
 
             $data = $devices->sensor()->get();
 
-            return ApiHelpers::success($data, 'Berhasil mengambil seluruh data!');
+            return ApiHelpers::ok($data, 'Berhasil mengambil seluruh data!');
         } catch (Exception $e) {
-            return ApiHelpers::error($e, 'Terjadi Kesalahan');
+            return ApiHelpers::badRequest($e, 'Terjadi Kesalahan');
         }
     }
 
@@ -69,9 +71,9 @@ class DevicesSensorsController extends Controller
 
             $data = $devices->sensor()->orderBy('created_at', 'desc')->first();
 
-            return ApiHelpers::success($data, 'Berhasil mengambil terkini data!');
+            return ApiHelpers::ok($data, 'Berhasil mengambil terkini data!');
         } catch (Exception $e) {
-            return ApiHelpers::error($e, 'Terjadi Kesalahan');
+            return ApiHelpers::badRequest($e, 'Terjadi Kesalahan');
         }
     }
 }

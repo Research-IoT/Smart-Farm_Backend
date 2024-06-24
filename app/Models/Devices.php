@@ -13,9 +13,10 @@ class Devices extends Model
     protected $table = 'devices';
     protected $fillable = [
         'name',
+        'status',
         'automatic',
-        'relay_a',
-        'relay_b'
+        'heater',
+        'blower'
     ];
 
     protected $hidden = [
@@ -25,14 +26,10 @@ class Devices extends Model
 
     protected $casts = [
         'automatic' =>'boolean',
-        'relay_a' =>'boolean',
-        'relay_b' =>'boolean'
+        'heater' =>'boolean',
+        'blower' =>'boolean'
         ];
 
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
     public function sensor()
     {
         return $this->hasMany(DevicesSensors::class);

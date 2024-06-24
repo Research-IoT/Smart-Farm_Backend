@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use Exception;
 use Ramsey\Uuid\Uuid;
+
 use App\Models\User;
-use Illuminate\Http\Request;
 use App\Helpers\ApiHelpers;
 use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\Registered;
@@ -21,13 +23,15 @@ class UsersController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'name' => 'required|string|max:255',
-                'email' => 'required|string|max:50|unique:users',
+                'role' => 'required|string|max:10|',
+                'no_hp' => 'required|string|max:15|unique:users',
+                'alamat' => 'required|string|max:255',
                 'password' => ['required', 'string', Password::defaults()],
             ]);
 
             if($validator->fails())
             {
-                return ApiHelpers::error($validator->errors(), 'Ada data yang tidak valid!');
+                return ApiHelpers::badRequest($validator->errors(), 'Ada data yang tidak valid!');
             }
 
             $validated = $validator->validated();
@@ -37,17 +41,17 @@ class UsersController extends Controller
             User::create($validated);
             event(new Registered($validated));
 
-            $user = User::where('email', $validated['email'])->first();
-            $token = $user->createToken('users')->plainTextToken;
+            $user = User::where('no_hp', $validated['no_hp'])->first();
+            $token = $user->createToken($request->name, ['users'])->plainTextToken;
 
-            $data = [
+            $response = [
                 'access_token' => "Bearer $token",
                 'user' => $user
             ];
 
-            return ApiHelpers::success($data, 'Berhasil Mendaftarkan Pengguna Baru!');
+            return ApiHelpers::success($response, 'Berhasil Mendaftarkan Pengguna Baru!');
         } catch (Exception $e) {
-            return ApiHelpers::error($e, 'Terjadi Kesalahan');
+            return ApiHelpers::badRequest($e, 'Terjadi Kesalahan');
         }
     }
 
@@ -55,21 +59,21 @@ class UsersController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'email' => 'required|string',
+                'no_hp' => 'required|string',
                 'password' => 'required|string',
             ]);
 
             if ($validator->fails())
             {
-                return ApiHelpers::error($validator->errors(), 'Ada data yang tidak valid!');
+                return ApiHelpers::badRequest($validator->errors(), 'Ada data yang tidak valid!');
             }
 
             $validated = $validator->validated();
 
-            $user = User::where('email', $validated['email'])->first();
+            $user = User::where('no_hp', $validated['no_hp'])->first();
 
             if (!$user || !Hash::check($validated['password'], $user->password)) {
-                return ApiHelpers::error([], 'Data Tidak Ditemukan atau Password Salah!', 401);
+                return ApiHelpers::badRequest([], 'Data Tidak Ditemukan atau Password Salah!', 401);
             }
 
             $user->tokens()->delete();
@@ -80,9 +84,9 @@ class UsersController extends Controller
                 'user' => $user
             ];
 
-            return ApiHelpers::success($data, 'Berhasil Masuk!');
+            return ApiHelpers::ok($data, 'Berhasil Masuk!');
         } catch (\Exception $e) {
-            return ApiHelpers::error($e, 'Terjadi Kesalahan');
+            return ApiHelpers::badRequest($e, 'Terjadi Kesalahan');
         }
     }
 
@@ -93,12 +97,12 @@ class UsersController extends Controller
 
             if (!$user)
             {
-                return ApiHelpers::error([], 'Unauthorized', 401);
+                return ApiHelpers::badRequest([], 'Unauthorized', 401);
             }
 
-            return ApiHelpers::success($user, 'Mohon Simpan Token Anda!');
+            return ApiHelpers::ok($user, 'Berhasil Mengambil Data Pengguna!');
         } catch (Exception $e) {
-            return ApiHelpers::error($e, 'Terjadi Kesalahan');
+            return ApiHelpers::badRequest($e, 'Terjadi Kesalahan');
         }
     }
 
@@ -109,14 +113,14 @@ class UsersController extends Controller
 
             if (!$user)
             {
-                return ApiHelpers::error([], 'Unauthorized', 401);
+                return ApiHelpers::badRequest([], 'Unauthorized', 401);
             }
 
             $data = $request->user()->currentAccessToken()->delete();
 
-            return ApiHelpers::success($data, 'Token Dihapus!');
-        } catch (\Exception $error) {
-            return ApiHelpers::error($error, 'Terjadi Kesalahan');
+            return ApiHelpers::ok($data, 'Token Dihapus!');
+        } catch (Exception $error) {
+            return ApiHelpers::badRequest($error, 'Terjadi Kesalahan');
         }
     }
 }

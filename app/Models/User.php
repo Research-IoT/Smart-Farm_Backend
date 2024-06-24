@@ -15,22 +15,25 @@ class User extends Authenticatable
 
     protected $fillable = [
         'name',
-        'email',
+        'role',
+        'no_hp',
+        'alamat',
         'password',
+        'token',
+        'last_used_at',
+        'expires_at'
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
+        'email_verified_at',
+        'updated_at',
+        'created_at'
     ];
 
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
-
-    public function devices()
-    {
-        return $this->hasMany(Devices::class);
-    }
 }

@@ -14,12 +14,11 @@ return new class extends Migration
     {
         Schema::create('devices', function (Blueprint $table) {
             $table->id();
-            $table->string('id_farm')->unique();
-            $table->foreignIdFor(User::class)->constrained();
             $table->string('name')->unique();
+            $table->string('status');
             $table->boolean('automatic');
-            $table->boolean('relay_blower');
-            $table->boolean('relay_heater');
+            $table->boolean('heater');
+            $table->boolean('blower');
             $table->timestamps();
         });
     }
