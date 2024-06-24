@@ -15,7 +15,6 @@ return new class extends Migration
         Schema::create('devices', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
-            $table->string('status');
             $table->boolean('automatic');
             $table->boolean('heater');
             $table->boolean('blower');
