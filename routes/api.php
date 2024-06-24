@@ -42,15 +42,10 @@ Route::prefix('/v1')->group(function () {
             Route::get('/details', [DevicesController::class, 'details']);
         });
 
-        Route::prefix('/status')->group(function () {
-            Route::post('/update', 'update')->middleware('auth:sanctum');
-            Route::get('/sensor', 'sensor')->middleware('auth:sanctum');
-        });
-
         Route::prefix('/sensor')->controller(DevicesSensorsController::class)->group(function(){
-        Route::post('/add', 'add')->middleware('auth:sanctum');
-        Route::get('/summary', 'summary')->middleware('auth:sanctum');
-        Route::get('/current', 'current')->middleware('auth:sanctum');
-    });
+            Route::post('/add', 'add')->middleware(['auth:sanctum', 'abilities:devices']);
+            Route::get('/summary', 'summary')->middleware(['auth:sanctum', 'abilities:users']);
+            Route::get('/current', 'current')->middleware(['auth:sanctum', 'abilities:users']);
+        });
     });
 });
