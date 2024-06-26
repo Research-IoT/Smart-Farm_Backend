@@ -27,7 +27,8 @@ class Devices extends Model
         'automatic' =>'boolean',
         'heater' =>'boolean',
         'blower' =>'boolean'
-        ];
+    ];
+
 
     public function sensor()
     {

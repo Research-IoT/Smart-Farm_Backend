@@ -11,6 +11,7 @@ use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class DevicesSensorsController extends Controller
 {
@@ -40,13 +41,40 @@ class DevicesSensorsController extends Controller
 
             return ApiHelpers::success($data, 'Berhasil mengirim data!');
         } catch (Exception $e) {
-            return ApiHelpers::badRequest($e, 'Terjadi Kesalahan');
+            Log::error($e);
+            return ApiHelpers::internalServer($e, 'Terjadi Kesalahan');
         }
     }
 
-    public function summary(Request $request)
+    public function data_by_summary(Request $request)
     {
         try{
+            $users = Auth::check();
+
+            if(!$users)
+            {
+                return ApiHelpers::badRequest([], 'Token tidak ditemukan, atau tidak sesuai! ', 403);
+            }
+
+            $data = DevicesSensors::all();
+
+            return ApiHelpers::ok($data, 'Berhasil mengambil seluruh data!');
+        } catch (Exception $e) {
+            Log::error($e);
+            return ApiHelpers::internalServer($e, 'Terjadi Kesalahan');
+        }
+    }
+
+    public function data_by_id(Request $request)
+    {
+        try{
+            $users = Auth::check();
+
+            if(!$users)
+            {
+                return ApiHelpers::badRequest([], 'Token tidak ditemukan, atau tidak sesuai! ', 403);
+            }
+
             $devices = Devices::find($request->header('device_id'));
 
             $data = $devices->sensor()->get();
@@ -66,7 +94,8 @@ class DevicesSensorsController extends Controller
 
             return ApiHelpers::ok($data, 'Berhasil mengambil terkini data!');
         } catch (Exception $e) {
-            return ApiHelpers::badRequest($e, 'Terjadi Kesalahan');
+            Log::error($e);
+            return ApiHelpers::internalServer($e, 'Terjadi Kesalahan');
         }
     }
 }
