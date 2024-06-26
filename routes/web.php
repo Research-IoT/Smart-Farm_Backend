@@ -14,10 +14,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-//Route::get('/', function () {
-//    return view('welcome');
-//});
+Route::get('/', function () {
+    return redirect('/api/v1');
+});
 
 Route::get('/login', function () {
-    return ApiHelpers::error([], 'Belum Login', 401);
+    return ApiHelpers::badRequest([], 'Belum Login', 401);
 })->name('login');
