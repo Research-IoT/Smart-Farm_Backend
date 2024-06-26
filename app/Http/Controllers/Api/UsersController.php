@@ -3,9 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use Exception;
-use Ramsey\Uuid\Uuid;
 
-use App\Models\User;
+use App\Models\Users;
 use App\Helpers\ApiHelpers;
 use App\Http\Controllers\Controller;
 
@@ -13,8 +12,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
+
+use NotificationChannels\Fcm\FcmChannel;
+use NotificationChannels\Fcm\FcmMessage;
+use NotificationChannels\Fcm\Resources\Notification as FcmNotification;
 
 class UsersController extends Controller
 {
@@ -31,27 +35,28 @@ class UsersController extends Controller
 
             if($validator->fails())
             {
-                return ApiHelpers::badRequest($validator->errors(), 'Ada data yang tidak valid!');
+                return ApiHelpers::badRequest($validator->errors(), 'Ada data yang tidak valid!', 403);
             }
 
             $validated = $validator->validated();
 
             $validated['password'] = Hash::make($validated['password']);
 
-            User::create($validated);
+            Users::create($validated);
             event(new Registered($validated));
 
-            $user = User::where('no_hp', $validated['no_hp'])->first();
-            $token = $user->createToken($request->name, ['users'])->plainTextToken;
+            $users = Users::where('no_hp', $validated['no_hp'])->first();
+            $token = $users->createToken($request->name, ['users'])->plainTextToken;
 
             $response = [
                 'token' => "Bearer $token",
-                'user' => $user
+                'users' => $users
             ];
 
             return ApiHelpers::success($response, 'Berhasil Mendaftarkan Pengguna Baru!');
         } catch (Exception $e) {
-            return ApiHelpers::badRequest($e, 'Terjadi Kesalahan');
+            Log::error($e);
+            return ApiHelpers::internalServer($e, 'Terjadi Kesalahan');
         }
     }
 
@@ -65,62 +70,92 @@ class UsersController extends Controller
 
             if ($validator->fails())
             {
-                return ApiHelpers::badRequest($validator->errors(), 'Ada data yang tidak valid!');
+                return ApiHelpers::badRequest($validator->errors(), 'Ada data yang tidak valid!', 403);
             }
 
             $validated = $validator->validated();
 
-            $user = User::where('no_hp', $validated['no_hp'])->first();
+            $users = Users::where('no_hp', $validated['no_hp'])->first();
 
-            if (!$user || !Hash::check($validated['password'], $user->password)) {
+            if (!$users || !Hash::check($validated['password'], $users->password)) {
                 return ApiHelpers::badRequest([], 'Data Tidak Ditemukan atau Password Salah!', 401);
             }
 
-            $user->tokens()->delete();
-            $token = $user->createToken($user->name, ['users'])->plainTextToken;
+            $users->tokens()->delete();
+            $token = $users->createToken($users->name, ['users'])->plainTextToken;
 
             $data = [
                 'token' => "Bearer $token",
-                'user' => $user
+                'users' => $users
             ];
 
             return ApiHelpers::ok($data, 'Berhasil Masuk!');
         } catch (\Exception $e) {
-            return ApiHelpers::badRequest($e, 'Terjadi Kesalahan');
+            Log::error($e);
+            return ApiHelpers::internalServer($e, 'Terjadi Kesalahan');
         }
     }
 
     public function profile(Request $request)
     {
         try{
-            $user = Auth::user();
+            $users = Auth::check();
 
-            if (!$user)
+            if(!$users)
             {
-                return ApiHelpers::badRequest([], 'Unauthorized', 401);
+                return ApiHelpers::badRequest([], 'Token tidak ditemukan, atau tidak sesuai! ', 401);
             }
 
-            return ApiHelpers::ok($user, 'Berhasil Mengambil Data Pengguna!');
+            $data = Auth::user();
+
+            return ApiHelpers::ok($data, 'Berhasil Mengambil Data Pengguna!');
         } catch (Exception $e) {
-            return ApiHelpers::badRequest($e, 'Terjadi Kesalahan');
+            Log::error($e);
+            return ApiHelpers::internalServer($e, 'Terjadi Kesalahan');
         }
     }
 
     public function logout(Request $request)
     {
         try {
-            $user = Auth::user();
+            $users = Auth::user();
 
-            if (!$user)
+            if (!$users)
             {
                 return ApiHelpers::badRequest([], 'Unauthorized', 401);
             }
 
             $data = $request->user()->currentAccessToken()->delete();
 
-            return ApiHelpers::ok($data, 'Token Dihapus!');
-        } catch (Exception $error) {
-            return ApiHelpers::badRequest($error, 'Terjadi Kesalahan');
+            return ApiHelpers::success([], 'Token sudah dihapus!');
+        } catch (Exception $e) {
+            Log::error($e);
+            return ApiHelpers::internalServer($e, 'Terjadi Kesalahan');
         }
+    }
+
+    public function via($notifiable)
+    {
+        return [FcmChannel::class];
+    }
+
+    public function toFcm(): FcmMessage
+    {
+        return (new FcmMessage(notification: new FcmNotification(
+            title: 'Account Activated',
+            body: 'Your account has been activated.'
+        )))
+//            ->data(['data1' => 'value', 'data2' => 'value2'])
+//            ->custom([
+//                'android' => [
+//                    'notification' => [
+//                        'color' => '#0A0A0A',
+//                    ],
+//                    'fcm_options' => [
+//                        'analytics_label' => 'analytics',
+//                    ],
+//                ],
+//        ])
+            ;
     }
 }

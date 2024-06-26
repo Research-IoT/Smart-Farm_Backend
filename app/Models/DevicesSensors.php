@@ -26,6 +26,7 @@ class DevicesSensors extends Model
         'created_at'
     ];
 
+
     public function devices()
     {
         return $this->belongsTo(Devices::class);
